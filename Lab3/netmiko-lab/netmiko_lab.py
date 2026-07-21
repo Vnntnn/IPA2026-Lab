@@ -27,7 +27,7 @@ def devices_model(ip: int) -> dict:
         """Create device model to extract connection"""
         return {
                 'device_type': 'cisco_ios',
-                'ip': ip,
+                'ip': str(ip),
                 'username': USERNAME,
                 'password': PASSWORD,
                 'ssh_config_file': SSH_CONFIG,
@@ -40,11 +40,11 @@ def main() -> None:
         Main: Running preset config from file and write memory to network device
         """
         for dev in NETWORK_DEVICES:
-                print(f"Connecting to {dev['ip']}...")
+                print(f"Connecting to {dev}...")
                 net_connect = ConnectHandler(**devices_model(dev))
 
-                config_file_path = f"config/{dev['ip']}.config"
-                print(f"Applying config on {dev['ip']} from {config_file_path}...")
+                config_file_path = f"config/{dev}.config"
+                print(f"Applying config on {dev} from {config_file_path}...")
 
                 config = net_connect.send_config_from_file(
                         config_file=config_file_path,
@@ -52,10 +52,10 @@ def main() -> None:
                 )
                 print(config)
 
-                print(f"Saving config on {dev['ip']}...")
+                print(f"Saving config on {dev}...")
                 net_connect.save_config()
                 net_connect.disconnect()
-                print(f"Successfully finished {dev['ip']}!\n")
+                print(f"Successfully finished {dev}!\n")
 
 if __name__ == "__main__":
         main()
