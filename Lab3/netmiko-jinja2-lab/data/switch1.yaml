@@ -1,0 +1,16 @@
+vlans:
+  id: "101"
+interfaces:
+  - name: "g0"
+    range:
+      start: 1
+      end: 2
+    status: "no shutdown"
+acls:
+  - name: "remote"
+    type: "standard"
+    permits:
+      - ip: "172.31.14.0"
+        wildcard: "0.0.0.15"
+      - ip: "10.30.6.0"
+        wildcard: "0.0.1.255"
