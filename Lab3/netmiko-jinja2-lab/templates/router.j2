@@ -35,6 +35,9 @@ line vty 0 4
  access-class {{ acls[0].name }} in
  exit
 {% endfor %}
+{% if routes[1].ospf[0].id == 1 %}
+ip name-server vrf {{ nameservers.vrf }} {{ nameservers.ip }}
+{% endif %}
 ip route vrf {{ routes[1].ospf[0].vrf }} {{ routes[0].destination }} {{ routes[0].mask }} {{ routes[0]['next-hop'] }}
 ip dns server
 ip domain-lookup
