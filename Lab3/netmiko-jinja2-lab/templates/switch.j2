@@ -1,0 +1,23 @@
+vlan {{ vlans.id }}
+exit
+{% for dev in interfaces %}
+interface range {{ dev.name }}/{{ dev.range.start }}-{{ dev.range.end }}
+ switchport mode access
+ switchport access vlan {{ vlans.id }}
+ {# interface status (shutdown or no shutdown) #}
+ {{ dev.status }}
+ exit
+{% endfor %}
+{% for acl in acls %}
+ip access-list {{ acl.type }} {{ acl.name }}
+ {% for permit in acl.permits %}
+ permit {{ permit.ip }} {{ permit.wildcard }}
+ {% endfor %}
+ exit
+{% endfor %}
+line vty 0 4
+ {% for acl in acls %}
+ access-class {{ acl.name }} in
+ {% endfor %}
+ exit
+end

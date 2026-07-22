@@ -1,0 +1,66 @@
+interfaces:
+  - name: "g0/1"
+    ip: "172.16.1.1"
+    mask: "255.255.255.252"
+    status: "no shutdown"
+    nat: "inside"
+  - name: "g0/2"
+    ip: "192.168.2.1"
+    mask: "255.255.255.0"
+    status: "no shutdown"
+    nat: "inside"
+  - name: "g0/3"
+    ip: "dhcp"
+    status: "no shutdown"
+    nat: "outside"
+  - name: "lo1"
+    ip: "100.0.0.2"
+    mask: "255.255.255.255"
+    status: "no shutdown"
+routes:
+ - type: static
+   destination: "172.31.14.0"
+   mask: "255.255.255.240"
+   next-hop: "Null0"
+ - type: dynamic
+   ospf:
+   - id: 2
+     vrf: "control-data"
+     router: 
+     - network:
+       ip: "192.168.2.0"
+       wildcard: "0.0.0.255"
+       area: 0
+     - network:
+       ip: "172.16.1.0"
+       wildcard: "0.0.0.3"
+       area: 0
+     - network:
+       ip: "100.0.0.2"
+       wildcard: "0.0.0.0"
+       area: 0
+acls:
+  - name: "remote"
+    type: "standard"
+    permits:
+      - ip: "172.31.14.0"
+        wildcard: "0.0.0.15"
+      - ip: "10.30.6.0"
+        wildcard: "0.0.1.255"
+  - name: "PAT"
+    type: "standard"
+    interface: "GigabitEthernet0/3"
+    permits:
+      - ip: "192.168.1.0"
+        wildcard: "0.0.0.255"
+      - ip: "192.168.2.0"
+        wildcard: "0.0.0.255"
+      - ip: "172.16.1.0"
+        wildcard: "0.0.0.3"
+      - ip: "100.0.0.1"
+        wildcard: "0.0.0.0"
+      - ip: "100.0.0.2"
+        wildcard: "0.0.0.0"
+nameservers:
+  vrf: "control-data"
+  ip: 172.16.1.1

@@ -1,0 +1,41 @@
+{% for interface in interfaces %}
+interface {{ interface.name }}
+ ip address {{ interface.ip }} {{ interface.mask }}
+ {% if interface.nat != "none" %}
+ ip nat {{ interface.nat }}
+ {% endif %}
+ {{ interface.status }}
+ exit
+{% endfor %}
+{% for route in routes %}
+{% if route.type == "dynamic" %}
+{% for network in route.ospf %}
+router ospf {{ network.id }} vrf {{ network.vrf }}
+ {% for neighbor in network.router %}
+ network {{ neighbor.ip }} {{ neighbor.wildcard }} area {{ neighbor.area }}
+ {% endfor %}
+ {% if network.id == 2 %}
+ default-information originate
+ {% endif %}
+ capability vrf-lite
+ exit
+{% endfor %}
+{% endif %}
+{% endfor %}
+{% for acl in acls %}
+ip access-list {{ acl.type }} {{ acl.name }}
+ {% for permit in acl.permits %}
+ permit {{ permit.ip }} {{ permit.wildcard }}
+ {% endfor %}
+ exit
+{% if acl.name == "PAT" %}
+ip nat inside source list {{ acl.name }} interface {{ acl.interface }} vrf {{ routes[1].ospf[0].vrf }} overload
+{% endif %}
+line vty 0 4
+ access-class {{ acls[0].name }} in
+ exit
+{% endfor %}
+ip route vrf {{ routes[1].ospf[0].vrf }} {{ routes[0].destination }} {{ routes[0].mask }} {{ routes[0]['next-hop'] }}
+ip dns server
+ip domain-lookup
+end
