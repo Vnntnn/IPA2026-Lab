@@ -44,9 +44,10 @@ def get_device_status(
         status = net_connect.send_command('show ip interface brief | include up')
         format_status = status.split('\n')
         if format_status:
-                for line in format_status:
+                print(f"Active {len(format_status)} interface(s):\n", end="")
+                for index, line in enumerate(format_status):
                         name = line.strip().split()[0]
-                        print(f"Active interface: {name} is up.\n")
+                        print(f"\t{index + 1}.{name} is up.")
         else:
                 print("No any interface(s) is up.")
 
