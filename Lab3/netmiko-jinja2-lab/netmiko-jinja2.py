@@ -121,7 +121,7 @@ def main() -> None:
 
                 # Config device with Netmiko
                 config_file_path = f"{CONFIG_DIR}/{device}.config"
-                # config_device(devices_model(ip), device, config_file_path)
+                config_device(devices_model(ip), device, config_file_path)
 
 if __name__ == "__main__":
         main()
