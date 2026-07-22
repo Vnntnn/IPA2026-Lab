@@ -1,0 +1,6 @@
+Host 172.31.14.*
+  IdentityFile C:\Users\LAB308_XX\Downloads\ad
+  KexAlgorithms +diffie-hellman-group14-sha1,diffie-hellman-group-exchange-sha1
+  HostKeyAlgorithms +ssh-rsa
+  PubkeyAcceptedAlgorithms +ssh-rsa
+  IdentitiesOnly yes
