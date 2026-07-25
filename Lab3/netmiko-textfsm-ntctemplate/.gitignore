@@ -1,0 +1,4 @@
+# Venv textfsm
+testfsm
+__pycache__
+.pytest_cache
