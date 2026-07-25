@@ -1,0 +1,4 @@
+netmiko==4.7.0
+textfsm==2.1.0
+ntc-templates==9.2.0
+pytest==9.1.1
