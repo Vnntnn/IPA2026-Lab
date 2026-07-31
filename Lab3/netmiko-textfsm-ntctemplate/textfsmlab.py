@@ -1,18 +1,5 @@
 """
-    Auto-generate interface descriptions for R1, R2 and S1 from CDP.
-
-    `show cdp neighbors` is parsed with textfsm / ntc-templates to learn which
-    Cisco device sits on each local interface, then each interface is described:
-
-      * Cisco <-> Cisco link  -> "Connect to <remote-intf> of <remote-device>"
-      * Link to a PC          -> "Connect to PC"        (no CDP neighbor)
-      * DHCP client uplink    -> "Connect to WAN"       (R2 g0/3)
-
-    The description logic is pure (unit-tested in test_textfsm.py); main()
-    pushes it to the live devices over SSH with netmiko.
-
-    NOTE: named textfsmlab.py, not textfsm.py -- a module called textfsm.py
-    would shadow the textfsm library that ntc-templates imports.
+    TDD on cisco router, switch to see what connected to interfaces (PC, Network Devices, WAN)
 """
 
 import re
@@ -21,7 +8,6 @@ from ntc_templates.parse import parse_output
 from netmiko import ConnectHandler
 
 
-# --- description logic (pure, testable) --------------------------------------
 
 def short_interface(name: str) -> str:
     """"GigabitEthernet0/1" / "Gig 0/1" / "g0/1" -> "G0/1"."""
@@ -66,15 +52,10 @@ def interface_descriptions(
             result[key] = "Connect to PC"
     return result
 
-
-# --- live device configuration (control/data plane over SSH) -----------------
-
 USERNAME = "admin"
 PASSWORD = "cisco"
 SSH_CONFIG = "config_ssh"
 
-# ip, interfaces to describe, and which of them is the DHCP/WAN uplink.
-# Interfaces come from the netmiko-jinja2 lab topology data.
 DEVICES = {
     "S1": {"ip": "172.31.14.3", "interfaces": ["g0/1", "g0/2"], "wan": []},
     "R1": {"ip": "172.31.14.4", "interfaces": ["g0/1", "g0/2"], "wan": []},
@@ -83,7 +64,7 @@ DEVICES = {
 
 
 def devices_model(ip: str) -> dict:
-    """netmiko connection dict (same pattern as the netmiko-jinja2 lab)."""
+    """netmiko connection dict"""
     return {
         "device_type": "cisco_ios",
         "ip": str(ip),
