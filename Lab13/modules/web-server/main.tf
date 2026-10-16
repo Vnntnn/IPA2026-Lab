@@ -10,14 +10,19 @@ data "aws_ami" "amazon_linux" {
 
 resource "aws_security_group" "web" {
   name        = "${var.name_prefix}-web-sg"
-  description = "Allow HTTP inbound"
+  description = "Dynamically generated ingress rules"
   vpc_id      = var.vpc_id
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = var.allowed_http_cidrs
+  dynamic "ingress" {
+    for_each = var.ingress_rules
+
+    content {
+      description = ingress.value.description
+      from_port   = ingress.value.port
+      to_port     = ingress.value.port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+    }
   }
 
   egress {
@@ -30,11 +35,17 @@ resource "aws_security_group" "web" {
   tags = merge(var.tags, { Name = "${var.name_prefix}-web-sg" })
 }
 
-resource "aws_instance" "web" {
-  ami                    = data.aws_ami.amazon_linux.id
-  instance_type          = var.instance_type
-  subnet_id              = var.subnet_id
-  vpc_security_group_ids = [aws_security_group.web.id]
+resource "aws_instance" "server" {
+  for_each = var.servers
+
+  ami = data.aws_ami.amazon_linux.id
+
+  # Per-server size, taken from the map
+  instance_type = each.value.instance_type
+
+  subnet_id                   = var.subnet_id
+  vpc_security_group_ids      = [aws_security_group.web.id]
+  associate_public_ip_address = true
 
   root_block_device {
     volume_size = var.root_volume.size_gb
@@ -45,9 +56,12 @@ resource "aws_instance" "web" {
   user_data = <<-EOF
     #!/bin/bash
     dnf install -y nginx
-    echo "<h1>${var.name_prefix}</h1>" > /usr/share/nginx/html/index.html
+    echo "<h1>Hello from Terraform - $(hostname)</h1>" > /usr/share/nginx/html/index.html
     systemctl enable --now nginx
   EOF
 
-  tags = merge(var.tags, { Name = "${var.name_prefix}-web" })
+  tags = merge(var.tags, {
+    Name = "${var.name_prefix}-${each.key}"
+    Role = each.value.role
+  })
 }

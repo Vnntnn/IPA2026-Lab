@@ -96,3 +96,21 @@ variable "token" {
   type      = string
   sensitive = true
 }
+
+variable "servers" {
+  type = map(object({
+    instance_type = string
+    role          = string
+  }))
+  description = "Map of servers to create, keyed by logical name"
+  default = {
+    web = {
+      instance_type = "t3.micro"
+      role          = "frontend"
+    }
+    api = {
+      instance_type = "t3.micro"
+      role          = "backend"
+    }
+  }
+}

@@ -13,18 +13,6 @@ variable "subnet_id" {
   description = "Subnet in which to launch the instance"
 }
 
-variable "instance_type" {
-  type        = string
-  description = "EC2 instance size"
-  default     = "t3.micro"
-}
-
-variable "allowed_http_cidrs" {
-  type        = list(string)
-  description = "CIDR blocks permitted to reach port 80"
-  default     = ["0.0.0.0/0"]
-}
-
 variable "root_volume" {
   type = object({
     size_gb   = number
@@ -42,4 +30,46 @@ variable "tags" {
   type        = map(string)
   description = "Tags applied to all resources"
   default     = {}
+}
+
+variable "servers" {
+  type = map(object({
+    instance_type = string
+    role          = string
+  }))
+  description = "Map of servers to create, keyed by logical name"
+  default = {
+    web = {
+      instance_type = "t3.micro"
+      role          = "frontend"
+    }
+    api = {
+      instance_type = "t3.micro"
+      role          = "backend"
+    }
+  }
+}
+
+variable "ingress_rules" {
+  type = list(object({
+    description = string
+    port        = number
+    protocol    = string
+    cidr_blocks = list(string)
+  }))
+  description = "Security group ingress rules to generate"
+  default = [
+    {
+      description = "HTTP"
+      port        = 80
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    },
+    {
+      description = "HTTPS"
+      port        = 443
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
+  ]
 }
